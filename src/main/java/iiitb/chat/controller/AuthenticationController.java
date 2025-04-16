@@ -1,6 +1,7 @@
 package iiitb.chat.controller;
 
 import iiitb.chat.dto.LoginRequest;
+import iiitb.chat.dto.TokenResponse;
 import iiitb.chat.service.LoginService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class AuthenticationController {
     private final LoginService loginService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(loginService.login(request));
     }
 

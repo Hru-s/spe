@@ -3,6 +3,7 @@ package iiitb.chat.service;
 import iiitb.chat.dto.LoginRequest;
 //import com.prashantjain.esdtestingprogram.exception.CustomerNotFoundException;
 //import iiitb.chat.entity.Credentials;
+import iiitb.chat.dto.TokenResponse;
 import iiitb.chat.helper.EncryptionService;
 import iiitb.chat.helper.JWTHelper;
 //import iiitb.chat.mapper.CredentialsMapper;
@@ -25,27 +26,19 @@ public class LoginService {
     private final JWTHelper jwtHelper;
     private final EmployeeRepo employeeRepo;
 
-    public String login(LoginRequest request) {
+    public TokenResponse login(LoginRequest request) {
         Employees employees = employeeRepo.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("email doesnot exist"));
-        System.out.println("password ="+ employees.getPassword());
-        String raw = request.password();
-        String encoded = encryptionService.encode(raw);
-        System.out.println("Encrypted form of request password: " + encoded);
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        System.out.println("Test: " + encoder.matches("password", "$2a$10$gskLMqEXZWqVqsOmOBQe6.Lj7OE5U3ssOnxXWvVhTPHpxhQ59sG1e"));
+                .orElseThrow(() -> new IllegalArgumentException("Email does not exist"));
 
-        if(!encryptionService.validates(request.password(), employees.getPassword())) {
-            return "Wrong Password or Email";
+//        System.out.println("Stored hash: " + employees.getPassword());
+//        System.out.println("Raw password from request: " + request.password());
+//        System.out.println(new BCryptPasswordEncoder().encode("password"));
+//         Validate password (don't re-encode here)
+        if (!encryptionService.validates(request.password(), employees.getPassword())) {
+            throw new IllegalArgumentException("Wrong Password or Email");
         }
 
-        return jwtHelper.generateToken(String.valueOf(employees.getId()));
+        String token = jwtHelper.generateToken(String.valueOf(employees.getId()));
+        return new TokenResponse(token);
     }
-
-//    public String createUser(LoginRequest request) {
-//        Credentials credentials = credentialsMapper.toCreds(request);
-//        credentials.setPassword(encryptionService.encode(credentials.getPassword()));
-//        credentialsRepo.save(credentials);
-//        return "Customer Created Successfully";
-//    }
 }
